@@ -296,7 +296,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                /* panelpichart.setVisibility(View.GONE);
                 panelbarchart.setVisibility(View.GONE);
                 panellinechart.setVisibility(View.VISIBLE);
-*/              in = new Intent(MainActivity.this, AdvanceDetailsChart.class);
+*/              in = new Intent(MainActivity.this, TypeWiseDepAdvDtl.class);
                 startActivity(in);
                 finish();
                 break;

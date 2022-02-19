@@ -75,5 +75,15 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="myTVstyle">
+        <item name="android:textSize">23dip</item>
+        <item name="android:background">@color/white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">@font/calibri</item>
+        <item name="android:textColor">@color/gray</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
 
 </resources>

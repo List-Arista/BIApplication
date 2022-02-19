@@ -5,15 +5,15 @@
     <string name="lblBranch">Branch</string>
     <string name="pie_chart"></string>
     <string name="soap_action">BIFrontLineWebServices</string>
+    <!--<string name="url">https://www.panchgangabank.in:9938/axis2/services/BIFrontLineWebServices</string>-->
     <string name="url">http://listspl.ddns.net:8087/axis2/services/BIFrontLineWebServices</string>
-    <!--<string name="url">http://172.100.30.96:8087/axis2/services/BiWebService</string>-->
     <string name="namespace">http://frontline.list</string>
-    <string name="advYes">Yesterday Advance</string>
+    <string name="advYes">Advances</string>
     <string name="lnYes">Yesterday Loan</string>
     <string name="lnBefYes">Day Before Yesterday Loan</string>
     <string name="advBefYes">Day Before Yesterday Advance</string>
     <string name="depBefYes">Day Before Yesterday Deposit</string>
-    <string name="depYes">Yesterday Deposit</string>
+    <string name="depYes">Deposits</string>
     <string name="title_activity_dashboard">Dashboard</string>0
     <string name="lbl_userid">Enter User Id</string>
     <string name="lbl_pass">Enter Passward</string>
@@ -24,4 +24,21 @@
     <string name="signup_login_hint">Already have an account? Sign In</string>
     <string name="login_signup_hint">Don\'t have an account? Sign Up</string>
     <string name="alrt_exit">Do You Wan\'t To Exit?</string>
+    <string name="lbl_depAgtLon">CC/CASA Ratio</string>
+    <string name="lbl_advAgtdep">Advances/Deposit Ratio</string>
+    <string name="lbl_TdepAgtTlon">Term Loan/Term Dep. Ratio</string>
+    <string name="lbl_cdRatio">CD Ratio</string>
+    <string name="lbl_npa">NPA</string>
+    <string name="lbl_viewDetails">View Details</string>
+    <string name="lbl_yearDepSummary">Yearly Deposit Summary</string>
+    <string name="lbl_yearAdvSummary">Yearly Advance Summary</string>
+    <string name="lbl_branchWiseDep">BranchWise Deposit As On</string>
+    <string name="lbl_branchWiseAdv">BranchWise Advances As On</string>
+    <string name="lbl_amountIn">Amount In Lakhs</string>
+    <string name="lbl_typewiseAdv">Typewise Advance Summary</string>
+    <string name="lbl_typewiseDep">Typewise Deposit Summary</string>
+    <string name="lbl_catNpaSumm">Category Wise NPA Summary</string>
+    <string name="lbl_branchWise">Branch Wise</string>
+
+
 </resources>

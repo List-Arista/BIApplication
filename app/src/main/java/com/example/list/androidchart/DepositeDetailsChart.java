@@ -6,15 +6,20 @@ import android.os.AsyncTask;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.list.androidchart.uitily.PieColors;
+import com.example.list.androidchart.uitily.UserDao;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,15 +39,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class DepositeDetailsChart extends AppCompatActivity {
 
-    PieChart yespichart,befyespichart;
+    PieChart yespichart;
     private static String NAMESPACE = "";
     private static String URL = "";
     private static String SOAP_ACTION = "";
     private static String retjson = "";
     private static final String METHOD_NAME = "getBranchwiseDep";
-    TextView daybefyesturday,yesturday;
+    TextView tv_title,txt_heading;
     ArrayList<Integer> colors;
-    String retVal="";
+    String asondate="",type="";
 
     PrivateKey var1=null;
     String var5="",var3="";
@@ -52,33 +57,42 @@ public class DepositeDetailsChart extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deposite_details_chart);
 
-        daybefyesturday= (TextView) findViewById(R.id.daybefyesturday);
-        yesturday= (TextView) findViewById(R.id.yesturday);
+        tv_title= (TextView) findViewById(R.id.tv_title);
 
         var1 = (PrivateKey)getIntent().getSerializableExtra("VAR1");
         var3 = (String)getIntent().getSerializableExtra("VAR3");
-
-        daybefyesturday.setText(getString(R.string.depBefYes));
-        yesturday.setText(getString(R.string.depYes));
-
         yespichart= (PieChart) findViewById(R.id.yespichart);
-        befyespichart= (PieChart) findViewById(R.id.befyespichart);
-        colors = new ArrayList<>();
-        Random rnd = new Random();
-        for(int i=0;i<=50;i++){
-        colors.add(Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)));
+
+        colors = PieColors.getColors();
+
+        txt_heading=(TextView)findViewById(R.id.txt_heading);
+        String userName= UserDao.getUserName();
+        txt_heading.setText("Welcome "+userName);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            asondate = extras.getString("ASONDATE");
+            type= extras.getString("TYPE");
+        }
+
+        if(type.equalsIgnoreCase("DEP")){
+            tv_title.setText(getString(R.string.lbl_branchWiseDep)+" "+asondate);
+        }
+        else{
+            tv_title.setText(getString(R.string.lbl_branchWiseAdv)+" "+asondate);
         }
         CallWebService web=new CallWebService();
         web.execute();
-        //drawYesturdayChart();
-        //drawDayBeforeChart();
     }
 
     public void onBackPressed() {
         super.onBackPressed();
-        Intent in=new Intent(DepositeDetailsChart.this, Dashboard.class);
+        Bundle b=new Bundle();
+        Intent in=new Intent(DepositeDetailsChart.this, TwelveMonthsData.class);
         in.putExtra("VAR1", var1);
         in.putExtra("VAR3", var3);
+        b.putString("TYPE",type);
+        in.putExtras(b);
         startActivity(in);
         finish();
     }
@@ -97,7 +111,8 @@ public class DepositeDetailsChart extends AppCompatActivity {
             loadProBarObj.show();
             JSONObject jsonObj=new JSONObject();
             try {
-                jsonObj.put("NAME","111");
+                jsonObj.put("TYPE",type);
+                jsonObj.put("ASONDATE",asondate);
                 jsonObj.put("METHODCODE","3");
             }
             catch (JSONException ex)
@@ -152,7 +167,6 @@ public class DepositeDetailsChart extends AppCompatActivity {
                 JSONObject jobj=new JSONObject(str);
                 if(jobj.getString("RESPCODE").equalsIgnoreCase("0")){
                     drawYesturdayChart();
-                    drawDayBeforeChart();
                 }
             }catch(Exception e){
                 e.printStackTrace();
@@ -172,137 +186,54 @@ public class DepositeDetailsChart extends AppCompatActivity {
             ArrayList<PieEntry> yvalues = new ArrayList<PieEntry>();
             Log.e("retjson-- ",retjson);
             JSONObject job = new JSONObject(retjson);
-            JSONArray jarr=job.getJSONArray("YESDATA");
+            JSONArray jarr=job.getJSONArray("RETVAL");
             for(int i=0;i<jarr.length();i++){
 
                 JSONObject jobj=jarr.getJSONObject(i);
                 String branch=jobj.getString("BRNCD");
                 String brnName=jobj.getString("BRNNAME");
-               float f=Float.parseFloat(jobj.getString("AMOUNT"));
-                yvalues.add(new PieEntry(f,"Branch "+branch , i));
+                float f=Float.parseFloat(jobj.getString("AMOUNT"));
+
+                if(f<0) {
+                    yvalues.add(new PieEntry(f*-1, brnName+"("+f*-1+")"));
+                }
+                else{
+                    yvalues.add(new PieEntry(f, brnName+"("+f+")"));
+                }
             }
 
-
-            yespichart.setUsePercentValues(true);
-
-
-            /*yvalues.add(new PieEntry(10f, "branch 1", 0));
-            yvalues.add(new PieEntry(20f, "branch 2", 1));
-            yvalues.add(new PieEntry(30f, "branch 3", 2));
-            yvalues.add(new PieEntry(40f, "branch 4", 3));
-            yvalues.add(new PieEntry(50f, "branch 5", 4));
-            yvalues.add(new PieEntry(60f, "branch 6", 5));*/
-
             PieDataSet dataSet = new PieDataSet(yvalues, getString(R.string.lblBranch));
+            dataSet.setColors(colors);
             PieData data = new PieData(dataSet);
-
             data.setValueFormatter(new PercentFormatter());
+            data.setValueTextSize(12f);
+            data.setValueTextColor(Color.BLACK);
             Legend l = yespichart.getLegend();
-            l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+            l.setEnabled(false);
+            /*l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
             l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
             l.setOrientation(Legend.LegendOrientation.VERTICAL);
             l.setWordWrapEnabled(true);
             l.setDrawInside(false);
-            l.setYOffset(5f);
+            l.setYOffset(5f);*/
+            int colorBlack = Color.parseColor("#000000");
             Description description = new Description();
-            description.setText(getString(R.string.pie_chart));
+            description.setText(getString(R.string.lbl_amountIn));
+            description.setTextSize(20f);
+            yespichart.setUsePercentValues(true);
             yespichart.setDescription(description);
             yespichart.setDrawHoleEnabled(true);
             yespichart.setTransparentCircleRadius(20f);
             yespichart.setHoleRadius(20f);
-
-
-
-            /*colors.add(Color.rgb(46, 204, 113));
-            colors.add(Color.rgb(241, 196, 15));
-            colors.add(Color.rgb(231, 76, 60));
-            colors.add(Color.rgb(52, 152, 219));
-            colors.add(Color.rgb(179, 100, 53));
-            colors.add(Color.rgb(255, 140, 157));
-            colors.add(Color.rgb(192, 255, 140));*/
-
-            dataSet.setColors(colors);
-            data.setValueTextSize(12f);
-            data.setValueTextColor(Color.BLACK);
-            int colorBlack = Color.parseColor("#000000");
             yespichart.setEntryLabelColor(colorBlack);
             yespichart.setEntryLabelTextSize(12f);
             dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             yespichart.setData(data);
             yespichart.invalidate();
-
-
         }catch(Exception e){
             e.printStackTrace();
         }
 
     }
-
-    public void drawDayBeforeChart() {
-        try{
-
-
-
-            ArrayList<PieEntry> yvalues = new ArrayList<PieEntry>();
-
-
-            befyespichart.setUsePercentValues(true);
-            Log.e("retjson-- ",retjson);
-            JSONObject job = new JSONObject(retjson);
-            JSONArray jarr=job.getJSONArray("BEFYESDATA");
-
-            for(int i=0;i<jarr.length();i++){
-                JSONObject jobj=jarr.getJSONObject(i);
-                String branch=jobj.getString("BRNCD");
-                String brnName=jobj.getString("BRNNAME");
-                float f=Float.parseFloat(jobj.getString("AMOUNT"));
-                yvalues.add(new PieEntry(f,"Branch "+branch , i));
-            }
-
-            PieDataSet dataSet = new PieDataSet(yvalues, getString(R.string.lblBranch));
-            PieData data = new PieData(dataSet);
-
-            data.setValueFormatter(new PercentFormatter());
-            Legend l = befyespichart.getLegend();
-            l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-            l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-            l.setOrientation(Legend.LegendOrientation.VERTICAL);
-            l.setWordWrapEnabled(true);
-            l.setDrawInside(false);
-            l.setYOffset(5f);
-            Description description = new Description();
-            description.setText(getString(R.string.pie_chart));
-            befyespichart.setDescription(description);
-            befyespichart.setDrawHoleEnabled(true);
-            befyespichart.setTransparentCircleRadius(20f);
-            befyespichart.setHoleRadius(20f);
-
-
-
-            /*colors.add(Color.rgb(46, 204, 113));
-            colors.add(Color.rgb(241, 196, 15));
-            colors.add(Color.rgb(231, 76, 60));
-            colors.add(Color.rgb(52, 152, 219));
-            colors.add(Color.rgb(179, 100, 53));
-            colors.add(Color.rgb(255, 140, 157));
-            colors.add(Color.rgb(192, 255, 140));*/
-
-            dataSet.setColors(colors);
-            data.setValueTextSize(12f);
-            data.setValueTextColor(Color.BLACK);
-            int colorBlack = Color.parseColor("#000000");
-            befyespichart.setEntryLabelColor(colorBlack);
-            befyespichart.setEntryLabelTextSize(12f);
-            dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-            befyespichart.setData(data);
-            befyespichart.invalidate();
-
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
-    }
-
 
 }
